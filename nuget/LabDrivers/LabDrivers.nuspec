@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>LabDrivers</id>
+    <version>1.0.7</version>
+    <authors>ShawnLab</authors>
+    <owners>ShawnLab</owners>
+    <licenseUrl>http://www.lsi.umich.edu/labs/shawn-xu-lab</licenseUrl>
+    <projectUrl>http://www.lsi.umich.edu/labs/shawn-xu-lab</projectUrl>
+    <iconUrl>http://www.lsi.umich.edu/labs/shawn-xu-lab</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>All the Stages or Cameras for Tracking software</description>
+    <releaseNotes>LabDrivers realese</releaseNotes>
+    <copyright>Copyright 2020</copyright>
+    <tags>LabDrivers realese</tags>
+	<repository type="git" url="https://github.com/VanilaMao/LabDrivers" />
+  </metadata>
+</package>

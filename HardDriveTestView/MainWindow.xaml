@@ -1,0 +1,212 @@
+﻿<Window x:Class="HardDriveTestView.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:HardDriveTestView"
+        xmlns:PresentationOptions="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+        xmlns:labImage="clr-namespace:LabImage;assembly=LabImage"
+        xmlns:converters="clr-namespace:HardDriveTestView.converters"
+        xmlns:cameras="clr-namespace:LabDrivers.Cameras;assembly=LabDrivers"
+        d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel, IsDesignTimeCreatable=True}"
+        mc:Ignorable="d"
+        Title="Carbin Image Tracking Debug System" Height="450" Width="1600">
+    <Window.Resources>
+        <ResourceDictionary>
+            <local:EnumDescriptionTypeConverter x:Key="EnumDescriptionTypeConverter"/>
+            <converters:NullVisibilityConverter x:Key="NullVisibilityConverter"/>
+            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+            <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <converters:NullToValueConverter NullValue="False" NotNullValue="True"  x:Key="NullToValueConverter"/>
+            <!--in the future , use templateselctor based on type-->
+            <DataTemplate x:Key="CameraOptionTemplate" DataType="cameras:CameraOptionParameter">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Options:" VerticalAlignment="Center" Margin="10,0,0,0"></TextBlock>
+                    <ComboBox ItemsSource="{Binding Options}" Width="100" SelectedIndex="{Binding Value,Mode=TwoWay}" Margin="5"></ComboBox>
+                </StackPanel>
+            </DataTemplate>
+
+            <DataTemplate x:Key="CameraExposeTimeTemplate" DataType="cameras:CameraPrimitiveParameter">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Explosure Time:" VerticalAlignment="Center" Margin="10,0,0,0"></TextBlock>
+                    <TextBox Text="{Binding Value, Mode=TwoWay}"  Width="40" Margin="5" ></TextBox>
+                </StackPanel>
+            </DataTemplate>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding Key="Up" Command="{Binding MoveStageCommand}" CommandParameter="{x:Static local:StageDirection.Up}"/>
+        <KeyBinding Key="Down" Command="{Binding MoveStageCommand}" CommandParameter="{x:Static local:StageDirection.Down}"/>
+        <KeyBinding Key="Left" Command="{Binding MoveStageCommand}" CommandParameter="{x:Static local:StageDirection.Left}"/>
+        <KeyBinding Key="Right" Command="{Binding MoveStageCommand}" CommandParameter="{x:Static local:StageDirection.Right}"/>
+    </Window.InputBindings>
+    <Grid>
+        <StackPanel Orientation="Vertical" >
+            <DockPanel>
+                <StackPanel Orientation="Horizontal" Height="30" DockPanel.Dock="Left">
+                    <TextBlock Text="Select a camera:" VerticalAlignment="Center" Margin="10,0,0,0"></TextBlock>
+                    <ComboBox ItemsSource="{Binding Cameras}" Width="106" SelectedItem="{Binding SelectedCamera,Mode=TwoWay}" Margin="5,5">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name, Mode=OneWay}"></TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <ContentControl Content="{Binding SelectedCamera.CameraSettings.ReadOutOptions}" 
+                                    Visibility="{Binding SelectedCamera,Converter={StaticResource NullVisibilityConverter}}"
+                                    ContentTemplate="{StaticResource CameraOptionTemplate}"></ContentControl>
+                    <ContentControl Content="{Binding SelectedCamera.CameraSettings.ExposureTime}" 
+                                    Visibility="{Binding SelectedCamera,Converter={StaticResource NullVisibilityConverter}}"
+                                    ContentTemplate="{StaticResource CameraExposeTimeTemplate}"></ContentControl>
+                    <Button Width="60" Height="30" Margin="10,0" Command="{Binding RefreshDevicesCommand}">Refresh</Button>
+                    <Button Width="60" Height="30" Margin="10,0" Command="{Binding OpenCameraCommand}" IsEnabled="{Binding IsCameraOpened,Mode=OneWay,Converter={StaticResource InverseBooleanConverter}}">Open</Button>
+                    <Button Width="60" Height="30" Margin="10,0" Command="{Binding StartCameraCommand}" IsEnabled="{Binding IsCameraOpened,Mode=OneWay}">Start</Button>
+                    <Button Width="60" Height="30" Margin="10,0" Command="{Binding CloseCameraCommand}" IsEnabled="{Binding IsCameraOpened,Mode=OneWay}">Stop</Button>
+                    <TextBlock Text="Time: " VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding Seconds}" VerticalAlignment="Center"/>
+                    <TextBlock Text=" Frame: " VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding FrameCount}" VerticalAlignment="Center"/>
+                </StackPanel>
+                <Button Width="100"  Margin="10,0" Command="{Binding ProcessImageCommand}" DockPanel.Dock="Right" HorizontalAlignment="Right">Process Image</Button>
+                <Button Width="100"  Margin="10,0" Command="{Binding OpenImageCommand}" DockPanel.Dock="Right" HorizontalAlignment="Right">Open Image</Button>
+                <Button Width="120"  Margin="10,0" Command="{Binding OpenLineUpCommand}" 
+                        IsEnabled="{Binding IsCameraOpened, Converter={StaticResource InverseBooleanConverter}}"
+                        DockPanel.Dock="Right" HorizontalAlignment="Right">Dual View Lineup</Button>
+                <Button Margin="200,0,0,0" Width="100"  DockPanel.Dock="Right" Foreground="DeepPink"
+                        HorizontalAlignment="Center" ToolTip="Does not do anything, but can make arrow keys to move stages and make input available">Click Here</Button>
+            </DockPanel>
+            <Border BorderBrush="Blue" BorderThickness="1">
+                <StackPanel Orientation="Horizontal" Margin="5" >
+                    <TextBlock Text="ThreshHoldFactor" Margin="10,0,0,0"></TextBlock>
+                    <TextBox  Text="{Binding ProcessOptions.ThreshHoldFactor, Mode=TwoWay}" Width="40"></TextBox>
+
+                    <TextBlock Text="CastBits:"></TextBlock>
+                    <TextBox Text="{Binding ProcessOptions.CastBits, Mode=TwoWay}" Width="20" ></TextBox>
+
+                    <TextBlock Text="Cut Edge:" Margin="10,0,0,0" ToolTip="Try to filter worms the distance from their center to edge is less than this value,0 or null means will ignore this value"></TextBlock>
+                    <TextBox Text="{Binding ProcessOptions.CutEdege, Mode=TwoWay}" Width="40"></TextBox>
+
+
+                    <TextBlock Text="Min Length:" Margin="10,0,0,0"></TextBlock>
+                    <TextBox Text="{Binding ProcessOptions.MinLength, Mode=TwoWay}" Width="40"></TextBox>
+
+                    <TextBlock Text="Max Length:" Margin="10,0,0,0"></TextBlock>
+                    <TextBox Text="{Binding ProcessOptions.MaxLength, Mode=TwoWay}" Width="40"></TextBox>
+
+                    <TextBlock Text="Min Area:" Margin="10,0,0,0"></TextBlock>
+                    <TextBox Text="{Binding ProcessOptions.MinArea, Mode=TwoWay}" Width="40"></TextBox>
+
+                    <TextBlock Text="Max Area:" Margin="10,0,0,0"></TextBlock>
+                    <TextBox Text="{Binding ProcessOptions.MaxArea, Mode=TwoWay}" Width="40"></TextBox>
+
+                    <TextBlock Text="Which Algrithim:" Margin="10,0,0,0"></TextBlock>
+                    <ComboBox Width="100"
+                            ItemsSource="{Binding Source={local:EnumBindingSource {x:Type labImage:ProcessBlobMethod}}}"
+                            SelectedItem="{Binding ProcessOptions.MethodType,Converter={StaticResource EnumDescriptionTypeConverter}}">
+                    </ComboBox>
+
+                    <TextBlock Text="Worm/Cell is Dark" Margin="10,0,0,0"></TextBlock>
+                    <CheckBox  IsChecked="{Binding ProcessOptions.PickDark, Mode=TwoWay}" Width="20"></CheckBox>
+
+                    <TextBlock Text="Create RGB Image" Margin="10,0,0,0"></TextBlock>
+                    <CheckBox  IsChecked="{Binding ProcessOptions.IsRgbImageAvailable, Mode=TwoWay}" Width="20"></CheckBox>
+
+                    <TextBlock Text="Adaptive Threshold" Margin="10,0,0,0"></TextBlock>
+                    <CheckBox  IsChecked="{Binding ProcessOptions.AdaptiveThreshHold, Mode=TwoWay}" Width="20"></CheckBox>
+                </StackPanel>
+            </Border>
+            <DockPanel>
+                <StackPanel Orientation="Horizontal" Margin="5"  DockPanel.Dock="Left">
+                    <CheckBox  IsChecked="{Binding TrackingObject, Mode=TwoWay}"  Margin="10,0,0,0"
+                           IsEnabled="{Binding IsCalibration,Mode=OneWay,Converter={StaticResource InverseBooleanConverter}}" Width="20"></CheckBox>
+                    <TextBlock>Tracking</TextBlock>
+
+                    <CheckBox  IsChecked="{Binding StageOptions.XDirectionRightIncrease, Mode=TwoWay}" Margin="10,0,0,0" Width="20"></CheckBox>
+                    <TextBlock>Right Increase</TextBlock>
+
+                    <CheckBox  IsChecked="{Binding StageOptions.YDirectionDownIncrease, Mode=TwoWay}"  Width="20" Margin="10,0,0,0"></CheckBox>
+                    <TextBlock>Down Increase</TextBlock>
+
+                    <CheckBox  IsChecked="{Binding StageOptions.HighSolution, Mode=TwoWay}" Width="20" Margin="10,0,0,0"></CheckBox>
+                    <TextBlock>Micro Move</TextBlock>
+
+
+                    <TextBlock Margin="30,0,0,0">Default Move Step</TextBlock>
+                    <TextBox   Text="{Binding StageOptions.DefaultMovingStep, Mode=TwoWay}"  Width="40"></TextBox>
+
+
+
+                    <Button Command="{Binding MoveStageCommand}" CommandParameter="{x:Static local:StageDirection.Left}"  Margin="10,0,0,0">Move Left</Button>
+                    <Button Command="{Binding MoveStageCommand}"  CommandParameter="{x:Static local:StageDirection.Right}"  Margin="10,0,0,0">Move Right</Button>
+                    <Button Command="{Binding MoveStageCommand}"  CommandParameter="{x:Static local:StageDirection.Up}"  Margin="10,0,0,0">Move Up</Button>
+                    <Button Command="{Binding MoveStageCommand}"  CommandParameter="{x:Static local:StageDirection.Down}"  Margin="10,0,0,0">Move Down</Button>
+                </StackPanel>
+                <Border Background="Bisque" BorderBrush="Blue" BorderThickness="1" DockPanel.Dock="Right" HorizontalAlignment="Right" Margin="10,0,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Calibrate Section:" VerticalAlignment="Center"></TextBlock>
+                        <Button Command="{Binding StartCalibrateCommand}"  Margin="20,0,0,0">Start Calibration</Button>
+                        <Button Command="{Binding MarkCalibrateCommand}"  Margin="10,0,0,0">Mark Calibration</Button>
+                        <Button Command="{Binding StopCalibrateCommand}"  Margin="10,0,0,0">Stop Calibration</Button>
+                        <TextBlock Text="{Binding StageOptions.CalibrateFactor, Mode=OneWay}" Width="40" VerticalAlignment="Center"></TextBlock>
+                        <Button Command="{Binding StageXyPosCommand}" Margin="10,0,0,0">Get Stage X,Y</Button>
+                        <TextBlock Margin="10,0,0,0" Text="{Binding StageX}" VerticalAlignment="Center"/>
+                        <TextBlock Margin="10,0,0,0" Text="{Binding StageY}" VerticalAlignment="Center"/>
+                        <Button Command="{Binding MakeXyPosOriginCommand}" Margin="10,0,10,0">Make XY Origin</Button>
+
+                    </StackPanel>
+
+                </Border>
+            </DockPanel>
+            
+            <Border BorderBrush="Purple" BorderThickness="1" >
+                <StackPanel Orientation="Horizontal" Margin="5,5">
+                    <CheckBox IsChecked="{Binding SaveData}" Margin="10,0,0,0"
+                              ToolTip="You Must Click Save To file Button to Save File First"
+                              IsEnabled="{Binding SavedFileName,Converter={StaticResource NullToValueConverter}}"></CheckBox>
+                    <TextBlock Text="Save" Margin="5,0,0,0"></TextBlock>
+                    <TextBlock Text="LocalFlex:" Margin="20,0,0,0"></TextBlock>
+                    <CheckBox IsChecked="{Binding LocalFlex, Mode=TwoWay}" Margin="5,0,0,0"
+                              ToolTip="No matter what is cell is, it will move it back to the center of the camera 
+                              when this value is great or euqal the count of the past continous frames"
+                              ></CheckBox>
+                    <TextBox Text="{Binding LocalFlexNum,Mode=TwoWay}" Margin="5,0,0,5" Width="40" BorderThickness="0,0,0,1" BorderBrush="Blue"/>
+                    <TextBlock Text="Bin Split" Margin="0,0,2,0"></TextBlock>
+                    <CheckBox IsChecked="{Binding BinSplit,Mode=TwoWay}"></CheckBox>
+                    <TextBlock Text="Process Bin Left" Margin="10,0,2,0"></TextBlock>
+                    <CheckBox IsChecked="{Binding BinSplitHandleLeft,Mode=TwoWay}" IsEnabled="{Binding ProcessOptions.BinSplit}"></CheckBox>
+
+                    <TextBlock Text="Light Margin:" Margin="10,0,0,0" 
+                                   
+                                   ToolTip="Set the padding where the light is out of scope from the edge "></TextBlock>
+                    <Border BorderThickness="1" BorderBrush="Red" Margin="5,0">
+                        <StackPanel Orientation="Horizontal" Margin="5,0">
+                            <TextBlock Text="Left:"  />
+                            <TextBox Text="{Binding LightScope.LeftMargin,Mode=TwoWay}" Width="30"></TextBox>
+                            <TextBlock Text="Right:" Margin="5,0,0,0"/>
+                            <TextBox Text="{Binding LightScope.RightMargin,Mode=TwoWay}" Width="30"></TextBox>
+                            <TextBlock Text="Top:"  Margin="5,0,0,0"/>
+                            <TextBox Text="{Binding LightScope.TopMargin,Mode=TwoWay}" Width="30"></TextBox>
+                            <TextBlock Text="Bottom:"  Margin="5,0,0,0"/>
+                            <TextBox Text="{Binding LightScope.BottomMargin,Mode=TwoWay}" Width="30"></TextBox>
+                        </StackPanel>
+                    </Border>
+                    <Button Margin="30,0,0,0" Command="{Binding SaveToFileCommand}" >Save To File</Button>
+                    <TextBlock Text="{Binding SavedFileName,Mode=OneWay}" Margin="10,0,0,0" VerticalAlignment="Center"></TextBlock>
+                </StackPanel>
+            </Border>
+
+            <StackPanel Orientation="Horizontal">
+     
+                <Image Stretch="Uniform" Source="{Binding Source1}" Width="{Binding ImageSize}" MaxWidth="800" PresentationOptions:Freeze="True" ></Image>
+                <Border BorderBrush="Red"  BorderThickness="2"></Border>
+                <Image Stretch="Uniform"   Source="{Binding Source2}"  Width="{Binding ImageSize}" MaxWidth="800" PresentationOptions:Freeze="True"
+                       Visibility="{Binding BinSplit, Converter={StaticResource BooleanToVisibilityConverter}}" ></Image>
+                <Border BorderBrush="Red"  BorderThickness="2" Visibility="{Binding BinSplit, Converter={StaticResource BooleanToVisibilityConverter}}"></Border>
+                <Image Stretch="Uniform" Source="{Binding Source}" Width="{Binding ImageSize}" MaxWidth="800" PresentationOptions:Freeze="True"></Image>
+
+
+            </StackPanel>
+
+        </StackPanel>
+    </Grid>
+</Window>

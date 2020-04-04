@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>LabImage</id>
+    <version>1.0.4</version>
+    <authors>ShawnLab</authors>
+    <owners>ShawnLab</owners>
+    <licenseUrl>http://www.lsi.umich.edu/labs/shawn-xu-lab</licenseUrl>
+    <projectUrl>http://www.lsi.umich.edu/labs/shawn-xu-lab</projectUrl>
+    <iconUrl>http://www.lsi.umich.edu/labs/shawn-xu-lab</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Image Functions, wrapper with emgucv or potential others </description>
+    <releaseNotes>LabImage realese</releaseNotes>
+    <copyright>Copyright 2019</copyright>
+    <tags>LabImage realese</tags>
+	<repository type="git" url="https://github.com/VanilaMao/LabImage" />
+  </metadata>
+</package>

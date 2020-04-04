@@ -1,0 +1,16 @@
+﻿<Window x:Class="LabReader.View.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LabReader.View"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel, IsDesignTimeCreatable=True}"
+        Title="Covert Carbin File To Images" Height="200" Width="400">
+    <Grid>
+        <DockPanel>
+            <Button Width="100"  Margin="10,10" Command="{Binding ConvertCarbinsCommand}" Height="30" HorizontalAlignment="Left" DockPanel.Dock="Top">Load File...</Button>
+            <TextBlock Text="{Binding Progress, StringFormat={}{0:0%} Completed}" VerticalAlignment="Bottom" Margin="10"></TextBlock>
+        </DockPanel>
+    </Grid>
+</Window>
