@@ -4,6 +4,7 @@ namespace LabDrivers.Cameras
 {
     public enum CameraType
     {
-        Prime
+        Prime,
+        Andor
     }
 }

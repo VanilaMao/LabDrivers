@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-using System.Threading;
 using LabDrivers.Cameras.Events;
 using LabDrivers.Cameras.Prime.DataProviders;
 using LabDrivers.Cameras.Prime.DllImports;
@@ -38,6 +37,7 @@ namespace LabDrivers.Cameras.Prime
         public uint ReadOutTime { get; protected set; }
 
         public bool IsOpened { get; protected set; }
+        public bool IsContinous => false;
 
         protected PvTypes.PMCallBack_Ex3 Callback { get; }
         private bool IsAcquiring { get; set; }

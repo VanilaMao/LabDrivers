@@ -71,6 +71,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ATMCD64CS">
+      <HintPath>Drivers\andor\ATMCD64CS.dll</HintPath>
+    </Reference>
     <Reference Include="Interop.PRIORLib">
       <HintPath>Drivers\Prior\Interop.PRIORLib.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
@@ -86,6 +89,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cameras\AcquisitionType.cs" />
+    <Compile Include="Cameras\Andor\AndorCamera.cs" />
+    <Compile Include="Cameras\Andor\AndorCameraInfo.cs" />
+    <Compile Include="Cameras\Andor\AndorFactory.cs" />
+    <Compile Include="Cameras\Andor\AndorUtilities.cs" />
     <Compile Include="Cameras\CameraAttributeEnumeratePairValue.cs" />
     <Compile Include="Cameras\CameraOptionParameter.cs" />
     <Compile Include="Cameras\CameraPrimitiveParameter.cs" />

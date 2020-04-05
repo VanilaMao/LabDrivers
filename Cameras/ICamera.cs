@@ -23,5 +23,7 @@ namespace LabDrivers.Cameras
         bool Acquisition();
 
         bool IsOpened { get; }
+
+        bool IsContinous { get; }
     }
 }

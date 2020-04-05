@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using LabDrivers.Cameras.Andor;
 using LabDrivers.Cameras.Prime;
 using LabDrivers.Cameras.Prime.DllImports;
 using LabDrivers.Core;
@@ -22,8 +23,14 @@ namespace LabDrivers.Cameras
         // when starting opening a new camera
         public IEnumerable<ICameraInfo> FetchCameras()
         {
-            return GetPrimeCameras();
-            //and other cameras
+            var list = GetPrimeCameras();
+            var andor = AndorFactory.Current.GetAndor();
+            if (andor != null)
+            {
+                list.Add(andor);
+            }
+
+            return list;
         }
 
         public bool ShutDown()
@@ -39,15 +46,21 @@ namespace LabDrivers.Cameras
 
         public ICamera OpenCamera(ICameraInfo cameraInfo)
         {
-            if (cameraInfo.CameraType == CameraType.Prime)
+            ICamera camera = null;
+            switch (cameraInfo.CameraType)
             {
-                var camera = new Prime95SingleTypeCamera(cameraInfo);
-                Cameras.Add(camera);
-                camera.Open();
-                return camera;
+                case CameraType.Prime:
+                    camera = new Prime95SingleTypeCamera(cameraInfo);
+                    break;
+                case CameraType.Andor:
+                    camera = new AndorCamera(cameraInfo);
+                    break;
             }
 
-            return null;
+            if (camera == null) return null;
+            Cameras.Add(camera);
+            camera.Open();
+            return camera;
         }
 
         private List<ICameraInfo> GetPrimeCameras()
@@ -79,7 +92,7 @@ namespace LabDrivers.Cameras
             catch
             {
                 return list;
-            }           
+            }
         }
     }
 }
