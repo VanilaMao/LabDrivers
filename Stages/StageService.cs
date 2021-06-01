@@ -10,9 +10,13 @@ namespace LabDrivers.Stages
         public IEnumerable<ITrackingStage> GetStages()
         {
             var priorStage = new PriorTrackingStage(0,0);
-            if (priorStage.Connect())
+            if (priorStage .IsOpened && priorStage.Connect())
             {
                 yield return priorStage;
+            }
+            else
+            {
+                yield return null;
             }
         }
     }
