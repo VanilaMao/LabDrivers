@@ -34,9 +34,9 @@ namespace LabSave
                     var directorName = fileName.DirectorName();
                     using (var ftd = new StreamWriter(File.Open(FileName + ".ftd", FileMode.OpenOrCreate)))
                     {
-                        for (;cacheFileNumber > 0 && fileNumber < TotalFrames;)
+                        for (int casheNumber =1;cacheFileNumber > 0&& casheNumber<= cacheFileNumber && fileNumber < TotalFrames; casheNumber++)
                         {
-                            var frames = ReadOneCacheFile(FileName + cacheFileNumber + ".cache");
+                            var frames = ReadOneCacheFile(FileName + casheNumber + ".cache");
                             foreach (var frame in frames)
                             {
                                 using (var tiffFs = new FileStream(directorName+fileNumber.ToString("0000")+".tif", FileMode.OpenOrCreate))
@@ -50,7 +50,6 @@ namespace LabSave
                                 var report = fileNumber *1.0 / TotalFrames;
                                 reportProgress?.Invoke(report);
                             }
-                            cacheFileNumber--;
                         }
                     }  
                 }
