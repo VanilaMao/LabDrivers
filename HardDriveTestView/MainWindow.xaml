@@ -8,6 +8,8 @@
         xmlns:labImage="clr-namespace:LabImage;assembly=LabImage"
         xmlns:converters="clr-namespace:HardDriveTestView.converters"
         xmlns:cameras="clr-namespace:LabDrivers.Cameras;assembly=LabDrivers"
+        xmlns:behaviors="clr-namespace:HardDriveTestView.Behaviors"
+        xmlns:ap="clr-namespace:HardDriveTestView.AttachPropities"
         d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel, IsDesignTimeCreatable=True}"
         mc:Ignorable="d"
         Title="Carbin Image Tracking Debug System" Height="450" Width="1600">
@@ -18,6 +20,16 @@
             <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <converters:NullToValueConverter NullValue="False" NotNullValue="True"  x:Key="NullToValueConverter"/>
+
+            <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+                <Setter Property="ap:BehaviorStyleAttachProperty.Behaviors" >
+                    <Setter.Value>
+                        <ap:BehaviorCreatorCollection>
+                            <behaviors:TextBoxEnterKeyUpdateBehavior/>
+                        </ap:BehaviorCreatorCollection>
+                    </Setter.Value>
+                </Setter>
+            </Style>
             <!--in the future , use templateselctor based on type-->
             <DataTemplate x:Key="CameraOptionTemplate" DataType="cameras:CameraOptionParameter">
                 <StackPanel Orientation="Horizontal">
@@ -39,6 +51,9 @@
         <KeyBinding Key="Down" Command="{Binding MoveStageCommand}" CommandParameter="{x:Static local:StageDirection.Down}"/>
         <KeyBinding Key="Left" Command="{Binding MoveStageCommand}" CommandParameter="{x:Static local:StageDirection.Left}"/>
         <KeyBinding Key="Right" Command="{Binding MoveStageCommand}" CommandParameter="{x:Static local:StageDirection.Right}"/>
+        <KeyBinding Modifiers="Ctrl" Key="NumPad0" Command="{Binding TrackingCommad}" />
+        <KeyBinding Modifiers="Ctrl" Key="NumPad1" Command="{Binding SavingCommand}" />
+        <KeyBinding Modifiers="Ctrl" Key="Down" Command="{Binding StageSpeedCommand}" />
     </Window.InputBindings>
     <Grid>
         <StackPanel Orientation="Vertical" >
@@ -81,7 +96,7 @@
                     <TextBox  Text="{Binding ProcessOptions.ThreshHoldFactor, Mode=TwoWay}" Width="40"></TextBox>
 
                     <TextBlock Text="CastBits:"></TextBlock>
-                    <TextBox Text="{Binding ProcessOptions.CastBits, Mode=TwoWay}" Width="20" ></TextBox>
+                    <TextBox Text="{Binding ProcessOptions.CastBits, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="20" ></TextBox>
 
                     <TextBlock Text="Cut Edge:" Margin="10,0,0,0" ToolTip="Try to filter worms the distance from their center to edge is less than this value,0 or null means will ignore this value"></TextBlock>
                     <TextBox Text="{Binding ProcessOptions.CutEdege, Mode=TwoWay}" Width="40"></TextBox>

@@ -55,6 +55,13 @@ namespace HardDriveTestView
             _cameraService = new CameraService();
             _cameraService.FetchCameras().Foreach(x => Cameras.Add(x));
             Stage = stageService.GetStages().FirstOrDefault();
+            StageSpeedCommand = new SimpleCommand(() => 
+                StageOptions.HighSolution = !StageOptions.HighSolution);
+            TrackingCommad = new SimpleCommand(()=>TrackingObject = !TrackingObject);
+            SavingCommand = new SimpleCommand(() => {
+                SaveData = !SaveData;
+            });
+
             OpenCameraCommand = new SimpleCommand(OpenCamrea);
             CloseCameraCommand = new SimpleCommand(CloseCamera);
             StartCameraCommand = new SimpleCommand(StartRecord);
@@ -135,6 +142,12 @@ namespace HardDriveTestView
         public ICamera Camera { get; set; }
 
         public ITrackingStage Stage { get; set; }
+
+        public ICommand StageSpeedCommand { get; }
+        
+        public ICommand TrackingCommad { get; }
+
+        public ICommand SavingCommand { get; }
 
         public ICommand MoveStageCommand { get; }
 
