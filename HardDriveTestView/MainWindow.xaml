@@ -54,6 +54,7 @@
         <KeyBinding Modifiers="Ctrl" Key="NumPad0" Command="{Binding TrackingCommad}" />
         <KeyBinding Modifiers="Ctrl" Key="NumPad1" Command="{Binding SavingCommand}" />
         <KeyBinding Modifiers="Ctrl" Key="Down" Command="{Binding StageSpeedCommand}" />
+        <KeyBinding Modifiers="Ctrl" Key="End" Command="{Binding CloseCameraCommand}" />
     </Window.InputBindings>
     <Grid>
         <StackPanel Orientation="Vertical" >
