@@ -49,6 +49,7 @@ namespace HardDriveTestView
         private double _imageSize;
         private DispatcherTimer _dispatcherTimer;
         private DateTime _startTime;
+        private bool _isRecord;
         public MainWindowViewModel()
         {
             IStageService stageService = new StageService();
@@ -306,6 +307,12 @@ namespace HardDriveTestView
                     labSave.StartTime = DateTime.Now;
                 }
             }
+        }
+
+        public bool IsRecorded
+        {
+            get => _isRecord;
+            set => SetProperty(ref _isRecord, value, nameof(IsRecorded));
         }
 
         public double ImageSize
@@ -567,14 +574,19 @@ namespace HardDriveTestView
             }
             Camera?.Stop();
             Stage?.Stop();
-            LabSave?.Save();
+            LabSave?.Save(()=>
+            {
+                SaveData = false;
+                IsRecorded = false;
+            });
             _dispatcherTimer.Stop();
-            SaveData = false;
             TrackingObject = false;
+            
         }
 
         private void StartRecord()
         {
+            IsRecorded = true;
             _startTime = DateTime.Now;
             Seconds = 0;
             FrameCount = 0;

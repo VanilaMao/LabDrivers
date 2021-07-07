@@ -25,7 +25,7 @@ namespace LabSave
         {
             TotalFrames++;
             Frames.Add(frame);
-            if (!SaveToCache || !CanAddFrame)
+            if (!SaveToCache || !CanAddFrame) //waiting for previous saveing compeletion
             {
                 return;
             }
@@ -33,14 +33,16 @@ namespace LabSave
             {
                 CacheFileNumber++;
                 var frames = Frames;
-                Task.Run(async () => await WriteCacheToFile(frames));
+                Task.Run(async () => {
+                    await WriteCacheToFile(frames);
+                });
                 if (lastFrame)
                 {
                     WriteToFlr();
                 }
                 else
                 {
-                    Frames = new List<Frame>();
+                    Frames = new List<Frame>(); // not last frame, continue to add frame, need to create new list to accepting new frame
                 }
             }
         }
@@ -55,15 +57,19 @@ namespace LabSave
             }
         }
 
-        public void Save()
+        public void Save(Action completeSave= null)
         {
             CanAddFrame = false;
             if (Frames.Count > 0)
             {
+                var frames = Frames;
+                Frames = new List<Frame>();
                 CacheFileNumber++;
                 Task.Run(async () => {
-                    await WriteCacheToFile(Frames);
-                    Frames?.Clear();
+                    await WriteCacheToFile(frames);
+                    CacheFileNumber = 0;
+                    CanAddFrame = true;
+                    completeSave?.Invoke();
                 });
             }
             WriteToFlr();
