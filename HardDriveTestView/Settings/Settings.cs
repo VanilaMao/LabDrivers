@@ -17,6 +17,8 @@ namespace HardDriveTestView.Settings
 
         public LightScope LightScope { get; set; }
 
+        public OtherOptions Options { get; set; }
+
         public TrackingOption TrackingOption { get; set; }
 
         public ProcessOptions ProcessOptions { get; set; }
