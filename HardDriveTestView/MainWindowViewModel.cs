@@ -264,35 +264,6 @@ namespace HardDriveTestView
             set => SetProperty(ref _isCalibration, value, nameof(IsCalibration));
         }
 
-        //public bool LocalFlex
-        //{
-        //    get => _localFlex;
-        //    set => SetProperty(ref _localFlex, value, nameof(LocalFlex));
-        //}
-
-        //public int LocalFlexNum
-        //{
-        //    get => _localFlexNum;
-        //    set => SetProperty(ref _localFlexNum, value, nameof(LocalFlexNum));
-        //}
-
-
-        //public bool BinSplit
-        //{
-        //    get => _binSplit;
-        //    set 
-        //    { 
-        //        SetProperty(ref _binSplit, value, nameof(BinSplit));
-        //        ImageSize = 800 * (_binSplit ? 0.5 : 1);
-        //    }
-        //}
-
-        //public bool BinSplitHandleLeft
-        //{
-        //    get => _binSplitHandleLeft;
-        //    set => SetProperty(ref _binSplitHandleLeft, value, nameof(BinSplitHandleLeft));
-        //}
-
         private int CurrentLocalFlexNum { get; set; }
 
         public bool SaveData
