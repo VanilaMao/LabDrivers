@@ -54,6 +54,7 @@
         <KeyBinding Modifiers="Ctrl" Key="NumPad0" Command="{Binding TrackingCommad}" />
         <KeyBinding Modifiers="Ctrl" Key="NumPad1" Command="{Binding SavingCommand}" />
         <KeyBinding Modifiers="Ctrl" Key="Down" Command="{Binding StageSpeedCommand}" />
+        <KeyBinding Modifiers="Ctrl" Key="End" Command="{Binding CloseCameraCommand}" />
     </Window.InputBindings>
     <Grid>
         <StackPanel Orientation="Vertical" >
@@ -75,8 +76,13 @@
                                     ContentTemplate="{StaticResource CameraExposeTimeTemplate}"></ContentControl>
                     <Button Width="60" Height="30" Margin="10,0" Command="{Binding RefreshDevicesCommand}">Refresh</Button>
                     <Button Width="60" Height="30" Margin="10,0" Command="{Binding OpenCameraCommand}" IsEnabled="{Binding IsCameraOpened,Mode=OneWay,Converter={StaticResource InverseBooleanConverter}}">Open</Button>
-                    <Button Width="60" Height="30" Margin="10,0" Command="{Binding StartCameraCommand}" IsEnabled="{Binding IsCameraOpened,Mode=OneWay}">Start</Button>
-                    <Button Width="60" Height="30" Margin="10,0" Command="{Binding CloseCameraCommand}" IsEnabled="{Binding IsCameraOpened,Mode=OneWay}">Stop</Button>
+                    <Border IsEnabled="{Binding IsCameraOpened,Mode=OneWay}">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Width="60" Height="30" Margin="10,0" Command="{Binding StartCameraCommand}" IsEnabled="{Binding IsRecorded,Mode=OneWay,Converter={StaticResource InverseBooleanConverter}}">Start</Button>
+                            <Button Width="60" Height="30" Margin="10,0" Command="{Binding CloseCameraCommand}" IsEnabled="{Binding IsRecorded,Mode=OneWay}">Stop</Button>
+                        </StackPanel>
+                    </Border>
+                    
                     <TextBlock Text="Time: " VerticalAlignment="Center"/>
                     <TextBlock Text="{Binding Seconds}" VerticalAlignment="Center"/>
                     <TextBlock Text=" Frame: " VerticalAlignment="Center"/>

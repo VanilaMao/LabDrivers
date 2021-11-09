@@ -7,7 +7,7 @@ namespace LabSave
     {
         void AddOneFrame(Frame frame, bool lastFrame = false);
         void AddFrames(Frame[] frames);
-        void Save();
+        void Save(Action completeSave);
         int MaxFrameAllowed { get; }
         void ClearSave();
         DateTime StartTime { get; }
