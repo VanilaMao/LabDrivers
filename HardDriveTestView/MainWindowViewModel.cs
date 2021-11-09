@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using HardDriveTestView.ComponentView;
 using LabDrivers.Cameras;
 using LabDrivers.Core;
@@ -47,7 +47,9 @@ namespace HardDriveTestView
         private bool _binSplitHandleLeft;
         private bool _isCameraOpened;
         private double _imageSize;
-
+        private DispatcherTimer _dispatcherTimer;
+        private DateTime _startTime;
+        private bool _isRecord;
         public MainWindowViewModel()
         {
             IStageService stageService = new StageService();
@@ -58,8 +60,12 @@ namespace HardDriveTestView
             StageSpeedCommand = new SimpleCommand(() => 
                 StageOptions.HighSolution = !StageOptions.HighSolution);
             TrackingCommad = new SimpleCommand(()=>TrackingObject = !TrackingObject);
-            SavingCommand = new SimpleCommand(() => {
-                SaveData = !SaveData;
+            SavingCommand = new SimpleCommand(() =>
+            {
+                if (!string.IsNullOrEmpty(SavedFileName))
+                {
+                    SaveData = !SaveData;
+                }
             });
 
             OpenCameraCommand = new SimpleCommand(OpenCamrea);
@@ -77,14 +83,15 @@ namespace HardDriveTestView
             MakeXyPosOriginCommand = new SimpleCommand(MakeXyPosOrigin);
             OpenLineUpCommand = new SimpleCommand(OpenLineUp);
             AppSettings = Settings.Settings.ReadSettings();
-            Watch = new Stopwatch();
             
 
             ImageSize = 800;
             LocalFlexNum = 5;
 
-            
 
+            _dispatcherTimer = new DispatcherTimer();
+            _dispatcherTimer.Tick += new EventHandler(DispatcherTimer_Tick);
+            _dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
 
             if (AppSettings.ProcessOptions == null)
             {
@@ -183,8 +190,6 @@ namespace HardDriveTestView
         public StageOptionsModel StageOptions { get; }
 
         public LightScopeModel LightScope { get; }
-
-        public Stopwatch Watch { get; }
 
         private bool ReOpenStageToNewOriginalPos { get; set; }
 
@@ -295,7 +300,19 @@ namespace HardDriveTestView
                 {
                     LabSave?.ClearSave();
                 }
+                _startTime = DateTime.Now;
+                var labSave = LabSave as LabSave.LabSave;
+                if (labSave != null)
+                {
+                    labSave.StartTime = DateTime.Now;
+                }
             }
+        }
+
+        public bool IsRecorded
+        {
+            get => _isRecord;
+            set => SetProperty(ref _isRecord, value, nameof(IsRecorded));
         }
 
         public double ImageSize
@@ -316,6 +333,10 @@ namespace HardDriveTestView
             set => SetProperty(ref _isCameraOpened, value, nameof(IsCameraOpened));
         }
 
+        private void DispatcherTimer_Tick(object sender, EventArgs e)
+        {
+            Seconds =(int)(DateTime.Now - _startTime).TotalSeconds;
+        }
 
         private void RefreshDevices()
         {
@@ -362,12 +383,8 @@ namespace HardDriveTestView
 
         private void ProcessImage()
         {
-            Watch.Restart();
             PocessImagAsync();
             ShowImage();
-            Watch.Stop();
-            TimeSpan ts = Watch.Elapsed;
-            Seconds = ts.Milliseconds;
         }
 
         private Task<Roi> PocessImagAsync()
@@ -442,14 +459,7 @@ namespace HardDriveTestView
                     }
 
                     FrameCount++;
-                    if (FrameCount % 100 == 0)
-                    {
-                        Watch.Stop();
-                        TimeSpan ts = Watch.Elapsed;
-                        Seconds += ts.Seconds;
-                        Watch.Restart();
-                    }
-
+              
                     LabImage?.Dispose();
                     Camera.Acquisition();
                 };
@@ -558,14 +568,26 @@ namespace HardDriveTestView
 
         private void CloseCamera()
         {
+            if (!IsCameraOpened)
+            {
+                return;
+            }
             Camera?.Stop();
             Stage?.Stop();
-            LabSave?.Save();
+            LabSave?.Save(()=>
+            {
+                SaveData = false;
+                IsRecorded = false;
+            });
+            _dispatcherTimer.Stop();
+            TrackingObject = false;
+            
         }
 
         private void StartRecord()
         {
-            Watch.Start();
+            IsRecorded = true;
+            _startTime = DateTime.Now;
             Seconds = 0;
             FrameCount = 0;
             Camera?.Start();
@@ -574,6 +596,8 @@ namespace HardDriveTestView
                 Stage?.Open(Stage.Options, 3, StageX, StageY);
                 ReOpenStageToNewOriginalPos = false;
             }
+            _dispatcherTimer.Start();
+            
         }
 
         private bool MoveStage(StageDirection direction)
