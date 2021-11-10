@@ -34,8 +34,26 @@
                 <Button Width="100"  Margin="10,0,0,0" Command="{Binding ProcessCommand}" Height="30" HorizontalAlignment="Left" IsEnabled="{Binding CanProcess, Mode=OneWay}" >Process Files...</Button>
             </StackPanel>
             
-            <TextBlock Text="{Binding Progress, StringFormat={}{0:0%} Completed}" VerticalAlignment="Bottom" Margin="10" DockPanel.Dock="Bottom"></TextBlock>
+            <TextBlock Text="{Binding Progress, StringFormat={}{0:0%} Completed}" 
+                       VerticalAlignment="Bottom" Margin="10" DockPanel.Dock="Bottom"></TextBlock>
             <ListBox Style="{StaticResource EmptyListStyle}" ItemsSource="{Binding Path=Files}" Margin="10,10" x:Name="FileList">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"></Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <DockPanel HorizontalAlignment="Stretch">
+                            <TextBlock Text="{Binding Percentage, StringFormat={}{0:0%}}" 
+                                       Foreground="Green" TextAlignment="Right"
+                                       FontWeight="Bold"
+                                       Margin="20,0" DockPanel.Dock="Right" HorizontalAlignment="Right"></TextBlock>
+                            <TextBlock Text="{Binding FileName}"></TextBlock>
+                        </DockPanel>
+                        
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
                 <ListBox.ContextMenu>
                     <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
                         <MenuItem Header="Delete" Command="{Binding DataContext.DeleteCommand}" CommandParameter="{Binding Path=SelectedItem}"/>

@@ -42,10 +42,6 @@ namespace HardDriveTestView
         private int _currentImageSizeY;
         private bool _saveData;
         private string _savedFileName;
-        private bool _localFlex;
-        private int _localFlexNum;
-        private bool _binSplit;
-        private bool _binSplitHandleLeft;
         private bool _isCameraOpened;
         private double _imageSize;
         private DispatcherTimer _dispatcherTimer;

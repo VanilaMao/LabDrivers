@@ -11,7 +11,7 @@ namespace LabReader.View
     public class MainWindowViewModel:ViewModelBase
     {
         private double _progress;
-        private ObservableCollection<string> _files;
+        private ObservableCollection<FileItem> _files;
         private bool _canProcess;
         private bool _canAddFile;
 
@@ -19,8 +19,8 @@ namespace LabReader.View
         {
             ConvertCarbinsCommand = new SimpleCommand(AddFile);
             ProcessCommand = new SimpleCommand(async () => await ConvertCarbins());
-            DeleteCommand = new SimpleCommand<string>(e=>DeleteFile(e));
-            _files = new ObservableCollection<string>();
+            DeleteCommand = new SimpleCommand<FileItem>(e=>DeleteFile(e));
+            _files = new ObservableCollection<FileItem>();
             _canAddFile = true;
         }
 
@@ -34,7 +34,7 @@ namespace LabReader.View
             set => SetProperty(ref _progress, value, nameof(Progress));
         }
 
-        public ObservableCollection<string> Files
+        public ObservableCollection<FileItem> Files
         {
             get
             {
@@ -58,7 +58,7 @@ namespace LabReader.View
             set { SetProperty(ref _canAddFile, value, nameof(CanAddFile)); }
         }
 
-        private bool DeleteFile(string file)
+        private bool DeleteFile(FileItem file)
         {
             Files.Remove(file);
             if(Files.Count == 0)
@@ -80,7 +80,7 @@ namespace LabReader.View
                 string fileName = dialog.FileName;
                 if (!string.IsNullOrEmpty(fileName))
                 {
-                    Files.Add(fileName);
+                    Files.Add(new FileItem() { FileName = fileName });
                     CanProcess = true;
                 }
             }
@@ -93,8 +93,28 @@ namespace LabReader.View
             foreach (var fileName in Files)
             {
                 ILabReader labReader = new LabSave.LabReader();
-                await labReader.ReadAsync(fileName, report => Progress = report);
+                await labReader.ReadAsync(fileName.FileName, report => {
+                    Progress = report;
+                    fileName.Percentage = report;
+                    }
+                );
             }
+        }
+    }
+
+    public class FileItem:ViewModelBase
+    {
+        private double _percentage;
+        public string FileName { get; set; }
+
+        public double Percentage
+        {
+            get { return _percentage; }
+            set
+            {
+                SetProperty(ref _percentage, value, nameof(Percentage));
+            }
+     
         }
     }
 }
