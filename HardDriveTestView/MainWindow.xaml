@@ -186,15 +186,15 @@
                               IsEnabled="{Binding SavedFileName,Converter={StaticResource NullToValueConverter}}"></CheckBox>
                     <TextBlock Text="Save" Margin="5,0,0,0"></TextBlock>
                     <TextBlock Text="LocalFlex:" Margin="20,0,0,0"></TextBlock>
-                    <CheckBox IsChecked="{Binding LocalFlex, Mode=TwoWay}" Margin="5,0,0,0"
+                    <CheckBox IsChecked="{Binding OtherOptions.LocalFlex, Mode=TwoWay}" Margin="5,0,0,0"
                               ToolTip="No matter what is cell is, it will move it back to the center of the camera 
                               when this value is great or euqal the count of the past continous frames"
                               ></CheckBox>
-                    <TextBox Text="{Binding LocalFlexNum,Mode=TwoWay}" Margin="5,0,0,5" Width="40" BorderThickness="0,0,0,1" BorderBrush="Blue"/>
+                    <TextBox Text="{Binding OtherOptions.LocalFlexNumber,Mode=TwoWay}" Margin="5,0,0,5" Width="40" BorderThickness="0,0,0,1" BorderBrush="Blue"/>
                     <TextBlock Text="Bin Split" Margin="0,0,2,0"></TextBlock>
-                    <CheckBox IsChecked="{Binding BinSplit,Mode=TwoWay}"></CheckBox>
+                    <CheckBox IsChecked="{Binding OtherOptions.BinSplit,Mode=TwoWay}"></CheckBox>
                     <TextBlock Text="Process Bin Left" Margin="10,0,2,0"></TextBlock>
-                    <CheckBox IsChecked="{Binding BinSplitHandleLeft,Mode=TwoWay}" IsEnabled="{Binding ProcessOptions.BinSplit}"></CheckBox>
+                    <CheckBox IsChecked="{Binding OtherOptions.ProcessLeft,Mode=TwoWay}" IsEnabled="{Binding OtherOptions.BinSplit}"></CheckBox>
 
                     <TextBlock Text="Light Margin:" Margin="10,0,0,0" 
                                    

@@ -126,6 +126,8 @@
     <Compile Include="EnumDescriptionTypeConverter.cs" />
     <Compile Include="LightScopeModel.cs" />
     <Compile Include="Models\LightScope.cs" />
+    <Compile Include="Models\OtherOptions.cs" />
+    <Compile Include="OtherOptionsModel.cs" />
     <Compile Include="Settings\Settings.cs" />
     <Compile Include="StageDirection.cs" />
     <Compile Include="StageOptionsModel.cs" />

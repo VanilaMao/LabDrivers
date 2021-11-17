@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using HardDriveTestView.ComponentView;
+using HardDriveTestView.Models;
 using LabDrivers.Cameras;
 using LabDrivers.Core;
 using LabDrivers.Stages;
@@ -41,10 +42,6 @@ namespace HardDriveTestView
         private int _currentImageSizeY;
         private bool _saveData;
         private string _savedFileName;
-        private bool _localFlex;
-        private int _localFlexNum;
-        private bool _binSplit;
-        private bool _binSplitHandleLeft;
         private bool _isCameraOpened;
         private double _imageSize;
         private DispatcherTimer _dispatcherTimer;
@@ -86,7 +83,6 @@ namespace HardDriveTestView
             
 
             ImageSize = 800;
-            LocalFlexNum = 5;
 
 
             _dispatcherTimer = new DispatcherTimer();
@@ -131,7 +127,14 @@ namespace HardDriveTestView
             }
             LightScope = new LightScopeModel(AppSettings.LightScope);
 
+            if (AppSettings.Options == null)
+            {
+                AppSettings.Options = new OtherOptions() { LocalFlexNumber = 5};
+            }
+            OtherOptions = new OtherOptionsModel(AppSettings.Options);
+
             LightScope.PropertyChanged += (o,e) => AppSettings.SaveSettings();
+            OtherOptions.PropertyChanged += (o, e) => AppSettings.SaveSettings();
             StageOptions.PropertyChanged += (o, e) => AppSettings.SaveSettings();
             ProcessOptions.PropertyChanged += (o, e) => AppSettings.SaveSettings();
 
@@ -188,9 +191,8 @@ namespace HardDriveTestView
         public ILabImage LabImage { get; set; }
         public ProcessOptionsModel ProcessOptions { get; }
         public StageOptionsModel StageOptions { get; }
-
         public LightScopeModel LightScope { get; }
-
+        public OtherOptionsModel OtherOptions { get; }
         private bool ReOpenStageToNewOriginalPos { get; set; }
 
         public string SavedFileName
@@ -260,34 +262,6 @@ namespace HardDriveTestView
             set => SetProperty(ref _isCalibration, value, nameof(IsCalibration));
         }
 
-        public bool LocalFlex
-        {
-            get => _localFlex;
-            set => SetProperty(ref _localFlex, value, nameof(LocalFlex));
-        }
-
-        public int LocalFlexNum
-        {
-            get => _localFlexNum;
-            set => SetProperty(ref _localFlexNum, value, nameof(LocalFlexNum));
-        }
-
-
-        public bool BinSplit
-        {
-            get => _binSplit;
-            set 
-            { 
-                SetProperty(ref _binSplit, value, nameof(BinSplit));
-                ImageSize = 800 * (_binSplit ? 0.5 : 1);
-            }
-        }
-
-        public bool BinSplitHandleLeft
-        {
-            get => _binSplitHandleLeft;
-            set => SetProperty(ref _binSplitHandleLeft, value, nameof(BinSplitHandleLeft));
-        }
         private int CurrentLocalFlexNum { get; set; }
 
         public bool SaveData
@@ -427,15 +401,15 @@ namespace HardDriveTestView
                 IsCameraOpened = true;
                 Camera.AcquistionCompleted += async (o, e) =>
                 {
-                    LabImage = LabImageFactory.From(e.SizeX, e.SizeY, e.Frame, BinSplit, BinSplitHandleLeft);
-                    _currentImageSizeX = BinSplit ? e.SizeX / 2 : e.SizeX;
+                    LabImage = LabImageFactory.From(e.SizeX, e.SizeY, e.Frame, OtherOptions.BinSplit, OtherOptions.ProcessLeft);
+                    _currentImageSizeX = OtherOptions.BinSplit ? e.SizeX / 2 : e.SizeX;
                     _currentImageSizeY = e.SizeY;
                     var roi = await PocessImagAsync();
                     _currentRoi = roi;
                     _currentStagePos = Stage?.GetStageXAndY();
-                    if (BinSplit)
+                    if (OtherOptions.BinSplit)
                     {
-                        using(var image = LabImageFactory.From(e.SizeX, e.SizeY, e.Frame, BinSplit, !BinSplitHandleLeft))
+                        using(var image = LabImageFactory.From(e.SizeX, e.SizeY, e.Frame, OtherOptions.BinSplit, !OtherOptions.ProcessLeft))
                         {
                             ShowBinSplitImage(image, ProcessOptions.Options.CastBits);
                         }
@@ -486,14 +460,14 @@ namespace HardDriveTestView
                 MotionPosX = motionPosX,
                 MotionPosY = motionPosY,
                 FrameHeight = _currentImageSizeY,
-                FrameWidth = BinSplit ? _currentImageSizeX * 2 : _currentImageSizeX,
+                FrameWidth = OtherOptions.BinSplit ? _currentImageSizeX * 2 : _currentImageSizeX,
                 Data = data,
                 ImageDistanceMappingToMotionDistance = StageOptions.CalibrateFactor,
                 ImotionX = (int)(motionPosX / StageOptions.CalibrateFactor + wormX),
                 ImotionY = (int)(motionPosY / StageOptions.CalibrateFactor + wormY),
                 IthisPosMotionX = (int)motionPosX,
                 IcenterX = roi?.CenterX ?? 0,
-                IlocalFlex = LocalFlexNum
+                IlocalFlex = OtherOptions.LocalFlexNumber
             };
             LabSave.AddOneFrame(frame);
         }
@@ -504,7 +478,7 @@ namespace HardDriveTestView
         {
             // StageAfterCenterDelay usuage: try to delay the stage processing after the stage is moving, try to solve the stage jumping issue
             // define the min frames delay between two stage moving behaviors
-            if (LocalFlex)
+            if (OtherOptions.LocalFlex)
             {
                 CurrentLocalFlexNum--;
             }
@@ -515,12 +489,12 @@ namespace HardDriveTestView
 
             if (_currentRoi == null) return;
 
-            if (LocalFlex && CurrentLocalFlexNum <= 0)
+            if (OtherOptions.LocalFlex && CurrentLocalFlexNum <= 0)
             {
-                CurrentLocalFlexNum = LocalFlexNum;
+                CurrentLocalFlexNum = OtherOptions.LocalFlexNumber;
                 MoveStage();
             }
-            else if (!LocalFlex && StageAfterCenterDelay > 5 && IsCellOutOfTheLigtScope())
+            else if (!OtherOptions.LocalFlex && StageAfterCenterDelay > 5 && IsCellOutOfTheLigtScope())
             {
                 StageAfterCenterDelay = 0;
                 MoveStage();

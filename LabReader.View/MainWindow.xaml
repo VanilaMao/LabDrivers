@@ -6,11 +6,60 @@
         xmlns:local="clr-namespace:LabReader.View"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel, IsDesignTimeCreatable=True}"
-        Title="Covert Carbin File To Images" Height="200" Width="400">
+        Title="Covert Carbin File To Images" Height="600" Width="800">
+    <Window.Resources>
+        <ResourceDictionary>
+            <Style x:Key="EmptyListStyle" TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
+                <Style.Triggers>
+                    <Trigger Property="HasItems" Value="False">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate>
+                                    <Border BorderThickness="2" BorderBrush="Red">
+                                        <TextBlock TextAlignment="Center" VerticalAlignment="Center" >Please Add files into this List...</TextBlock>
+                                    </Border>
+                                    
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
     <Grid>
         <DockPanel>
-            <Button Width="100"  Margin="10,10" Command="{Binding ConvertCarbinsCommand}" Height="30" HorizontalAlignment="Left" DockPanel.Dock="Top">Load File...</Button>
-            <TextBlock Text="{Binding Progress, StringFormat={}{0:0%} Completed}" VerticalAlignment="Bottom" Margin="10"></TextBlock>
+            <StackPanel Margin="10,10" Orientation="Horizontal" DockPanel.Dock="Top">
+                <Button Width="100"   Command="{Binding ConvertCarbinsCommand}" Height="30" HorizontalAlignment="Left" IsEnabled="{Binding CanAddFile}" >Add File...</Button>
+                <Button Width="100"  Margin="10,0,0,0" Command="{Binding ProcessCommand}" Height="30" HorizontalAlignment="Left" IsEnabled="{Binding CanProcess, Mode=OneWay}" >Process Files...</Button>
+            </StackPanel>
+            
+            <TextBlock Text="{Binding Progress, StringFormat={}{0:0%} Completed}" 
+                       VerticalAlignment="Bottom" Margin="10" DockPanel.Dock="Bottom"></TextBlock>
+            <ListBox Style="{StaticResource EmptyListStyle}" ItemsSource="{Binding Path=Files}" Margin="10,10" x:Name="FileList">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"></Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <DockPanel HorizontalAlignment="Stretch">
+                            <TextBlock Text="{Binding Percentage, StringFormat={}{0:0%}}" 
+                                       Foreground="Green" TextAlignment="Right"
+                                       FontWeight="Bold"
+                                       Margin="20,0" DockPanel.Dock="Right" HorizontalAlignment="Right"></TextBlock>
+                            <TextBlock Text="{Binding FileName}"></TextBlock>
+                        </DockPanel>
+                        
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <ListBox.ContextMenu>
+                    <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
+                        <MenuItem Header="Delete" Command="{Binding DataContext.DeleteCommand}" CommandParameter="{Binding Path=SelectedItem}"/>
+                    </ContextMenu>
+                </ListBox.ContextMenu>
+            </ListBox>
         </DockPanel>
     </Grid>
 </Window>
